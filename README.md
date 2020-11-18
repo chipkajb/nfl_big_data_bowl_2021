@@ -5,6 +5,8 @@ This repo contains football analytics scripts for the [NFL Big Data Bowl 2021](h
 Team members include: Jordan Chipka, Hunter Satterthwaite, Ryan Chipka, and Dan Chipka.
 
 ## Setup
+Download the [NFL Big Data Bowl 2021 data files](https://www.kaggle.com/c/nfl-big-data-bowl-2021/data) (20 csv files) to the `data` directory within this repo.
+
 Create the conda environment.
 ```
 conda create -y -n nfl_bdb python=3.6
