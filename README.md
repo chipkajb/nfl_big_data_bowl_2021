@@ -6,6 +6,7 @@ Team members include: Jordan Chipka, Hunter Satterthwaite, Ryan Chipka, and Dan 
 
 ## Setup
 Download the [NFL Big Data Bowl 2021 data files](https://www.kaggle.com/c/nfl-big-data-bowl-2021/data) (20 csv files) to the `data` directory within this repo.
+Also, download the [Bonus data](https://www.kaggle.com/tombliss/nfl-big-data-bowl-2021-bonus) (2 csv files) to the `data` directory.
 
 Create the conda environment.
 ```
