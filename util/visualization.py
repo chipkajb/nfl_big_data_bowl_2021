@@ -16,15 +16,14 @@ def plot_play(play_df, offense_positions, defense_positions, receiver_name, defe
         position = player_df["position"].iloc[0]
         if name == 'Football': # ball (black)
             ax.plot(x, y, color='k', linewidth=2)
-        elif player == receiver_name: # intended receiver (cyan)
-            ax.plot(x, y, color='c', linewidth=2)
-        elif player == defender_name: # defender (magenta)
-            ax.plot(x, y, color='m', linewidth=2)
+        elif player == receiver_name: # intended receiver (thicker blue)
+            ax.plot(x, y, color='b', linewidth=3)
+        elif player == defender_name: # defender (thicker red)
+            ax.plot(x, y, color='r', linewidth=3)
         elif position in defense_positions: # defense (red)
             ax.plot(x, y, color='r', linewidth=2)
         else: # offense (blue)
             ax.plot(x, y, color='b', linewidth=2)
-    print(np.unique(play_df["event"][play_df["event"] != "None"])) # print events of play (not in chronological order)
     plt.show()
 
 
@@ -103,3 +102,26 @@ def create_football_field(linenumbers=True,
         #plt.text(hl + 2, 50, '<- {}'.format(highlighted_name),
         #         color='yellow')
     return fig, ax
+
+
+# animate play
+def animate_play(play_df):
+    play_id = play_df["playId"].iloc[0]
+    home_query = 'playId == {:.0f} and team == "home"'.format(play_id)
+    away_query = 'playId == {:.0f} and team == "away"'.format(play_id)
+    football_query = 'playId == {:.0f} and displayName == "Football"'.format(play_id)
+    play_home = play_df.query(home_query)
+    play_away = play_df.query(away_query)
+    play_football = play_df.query(football_query)
+    fig, ax = create_football_field(highlight_line=True, highlight_line_number=play_football.iloc[0]["x"]-10)
+    plt.ion()
+    plt.show()
+    for i in range(1,len(play_football)+1):
+        frame_query = 'frameId == {:.0f}'.format(i)
+        home_pts = plt.scatter(play_home.query(frame_query)["x"], play_home.query(frame_query)["y"], c='orange', marker='o')
+        away_pts = plt.scatter(play_away.query(frame_query)["x"], play_away.query(frame_query)["y"], c='blue', marker='o')
+        football_pt = plt.scatter(play_football.query(frame_query)["x"], play_football.query(frame_query)["y"], c='black', marker='o')
+        plt.pause(0.001)
+        home_pts.remove()
+        away_pts.remove()
+        football_pt.remove()
