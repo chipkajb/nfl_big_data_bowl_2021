@@ -15,6 +15,8 @@ def get_targeted_receiver(target_rec_df, play_df, play_id):
 def get_defender(play_df, target_rec, defense_positions):
     pass_arrive_query = 'event == "pass_arrived"'
     pass_arrive_df = play_df.query(pass_arrive_query)
+    if len(pass_arrive_df) == 0:
+        pass_arrive_df = play_df[play_df.event.str.startswith("pass_outcome")]
     target_query = 'displayName == "' + target_rec + '"'
     target_df = pass_arrive_df.query(target_query)
     target_xy = target_df[["x","y"]].values

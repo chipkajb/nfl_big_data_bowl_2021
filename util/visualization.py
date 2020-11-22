@@ -21,9 +21,9 @@ def plot_play(play_df, offense_positions, defense_positions, receiver_name, defe
         elif player == defender_name: # defender (thicker red)
             ax.plot(x, y, color='r', linewidth=3)
         elif position in defense_positions: # defense (red)
-            ax.plot(x, y, color='r', linewidth=2)
+            ax.plot(x, y, color='r', linewidth=1)
         else: # offense (blue)
-            ax.plot(x, y, color='b', linewidth=2)
+            ax.plot(x, y, color='b', linewidth=1)
     plt.show()
 
 
