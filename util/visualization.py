@@ -1,6 +1,8 @@
 from matplotlib import pyplot as plt
 import numpy as np
 import matplotlib.patches as patches
+from util.util import *
+from pdb import set_trace as bp
 
 
 # plot play
@@ -106,7 +108,7 @@ def create_football_field(linenumbers=True,
 
 # animate play
 def animate_play(play_df):
-    play_id = play_df["playId"].iloc[0]
+    play_id = play_df.playId.iloc[0]
     home_query = 'playId == {:.0f} and team == "home"'.format(play_id)
     away_query = 'playId == {:.0f} and team == "away"'.format(play_id)
     football_query = 'playId == {:.0f} and displayName == "Football"'.format(play_id)
@@ -121,7 +123,17 @@ def animate_play(play_df):
         home_pts = plt.scatter(play_home.query(frame_query)["x"], play_home.query(frame_query)["y"], c='orange', marker='o')
         away_pts = plt.scatter(play_away.query(frame_query)["x"], play_away.query(frame_query)["y"], c='blue', marker='o')
         football_pt = plt.scatter(play_football.query(frame_query)["x"], play_football.query(frame_query)["y"], c='black', marker='o')
+        event = play_df.query(frame_query).event.iloc[0]
+        if event != 'None':
+            plt.title(event)
         plt.pause(0.001)
         home_pts.remove()
         away_pts.remove()
         football_pt.remove()
+
+# animate play 2
+def animate_play2(week, game_id, play_id):
+    week_df = load_week_df(week)
+    game_df = week_df.query('gameId == {:.0f}'.format(game_id))
+    play_df = game_df.query('playId == {:.0f}'.format(play_id))
+    animate_play(play_df)

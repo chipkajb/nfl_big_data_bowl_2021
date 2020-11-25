@@ -18,6 +18,7 @@ from util.visualization import *
 # load week dataframe
 for week in range(1,17):
     week_df = load_week_df(week)
+    bp()
 
     # load targeted receiver data
     target_rec_df = pd.read_csv("../data/targetedReceiver.csv")

@@ -1,5 +1,6 @@
-seaborn
 pandas
 numpy
 matplotlib
 tqdm
+plotly
+torch
