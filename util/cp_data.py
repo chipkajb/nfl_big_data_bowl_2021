@@ -1,5 +1,5 @@
 import numpy as np
-from util.visualization import *
+from visualization import *
 from pdb import set_trace as bp
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)

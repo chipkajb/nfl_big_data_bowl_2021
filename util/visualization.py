@@ -1,7 +1,7 @@
 from matplotlib import pyplot as plt
 import numpy as np
 import matplotlib.patches as patches
-from util.util import *
+from util import *
 from pdb import set_trace as bp
 
 

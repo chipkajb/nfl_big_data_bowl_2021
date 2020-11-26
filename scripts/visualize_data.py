@@ -3,13 +3,13 @@ from pdb import set_trace as bp
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
-# append parent directory to Python path
-import sys
-sys.path.append("..")
+# append ../util directory to Python path
+import os, sys
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'util'))
 
 # import utility functions from util directory
-from util.util import *
-from util.visualization import *
+from util import *
+from visualization import *
 
 
 # load week dataframe

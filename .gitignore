@@ -2,3 +2,4 @@
 util/__pycache__
 notebooks/.ipynb_checkpoints
 data/*.csv
+util/*.pyc

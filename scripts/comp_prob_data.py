@@ -3,14 +3,14 @@ import pandas as pd
 from tqdm import tqdm
 from pdb import set_trace as bp
 
-# append parent directory to Python path
-import sys
-sys.path.append("..")
+# append ../util directory to Python path
+import os, sys
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'util'))
 
 # import utility functions from util directory
-from util.util import *
-from util.visualization import *
-from util.comp_prob_data import *
+from util import *
+from visualization import *
+from cp_data import *
 
 
 # loop over weeks
