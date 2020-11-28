@@ -154,74 +154,78 @@ optimizer = optim.AdamW(cpnet.parameters())
 #                     ckpt_path)
 
 
-# ###############
-# #### TEST #####
-# ###############
-
-# # # load saved model
-# # ckpt_file = "../models/best_0194_0.483.pt"
-# # cpnet.load_state_dict(torch.load(ckpt_file)["model_state_dict"])
-# # cpnet.eval()
-
-# # # test uncalibrated model
-# # test_model(cpnet, cp_df, "Uncalibrated")
-
-# # # calibrate model
-# cpnet_calib = ModelWithTemperature(cpnet)
-# # cpnet_calib.set_temperature(val_loader)
-# # # save model
-# # ckpt_path = "../models/best_0194_0.483_calib.pt"
-# # torch.save({'model_state_dict': cpnet_calib.state_dict()}, ckpt_path)
+###############
+#### TEST #####
+###############
 
 # # load saved model
-# ckpt_file = "../models/best_0194_0.483_calib.pt"
-# cpnet_calib.load_state_dict(torch.load(ckpt_file)["model_state_dict"])
-# cpnet_calib.eval().cuda()
+# ckpt_file = "../models/best_0194_0.483.pt"
+# cpnet.load_state_dict(torch.load(ckpt_file)["model_state_dict"])
+# cpnet.eval()
 
-# # test calibrated model
-# test_model(cpnet_calib, cp_df, "Calibrated")
+# # test uncalibrated model
+# test_model(cpnet, cp_df, "Uncalibrated")
 
-
-
-#######################
-#### CONTRIBUTION #####
-#######################
+# # calibrate model
+cpnet_calib = ModelWithTemperature(cpnet)
+# cpnet_calib.set_temperature(val_loader)
+# # save model
+# ckpt_path = "../models/best_0194_0.483_calib.pt"
+# torch.save({'model_state_dict': cpnet_calib.state_dict()}, ckpt_path)
 
 # load saved model
-cpnet_calib = ModelWithTemperature(cpnet)
 ckpt_file = "../models/best_0194_0.483_calib.pt"
 cpnet_calib.load_state_dict(torch.load(ckpt_file)["model_state_dict"])
 cpnet_calib.eval().cuda()
 
-# get average data
-x_avg = np.array([lat_dist_mean, lon_dist_mean, wr_prox_mean, db_prox_mean, sl_prox_mean, bl_prox_mean, qb_vel_mean, t_throw_mean])
+# test calibrated model
+val_df = cp_df.ix[val_indices,:]
+train_df = cp_df.ix[train_indices,:]
+test_model(cpnet_calib, val_df, "Calibrated")
+# test_model(cpnet_calib, train_df, "Calibrated")
+# test_model(cpnet_calib, cp_df, "Calibrated")
 
-# find lat_dist contribution
-factor = 1
-delta_prob_lat_dist = get_contribution(cpnet_calib, x_avg, lat_dist_std, 0, factor)
-delta_prob_lon_dist = get_contribution(cpnet_calib, x_avg, lon_dist_std, 1, factor)
-delta_prob_wr_prox = get_contribution(cpnet_calib, x_avg, wr_prox_std, 2, factor)
-delta_prob_db_prox = get_contribution(cpnet_calib, x_avg, db_prox_std, 3, factor)
-delta_prob_sl_prox = get_contribution(cpnet_calib, x_avg, sl_prox_std, 4, factor)
-delta_prob_bl_prox = get_contribution(cpnet_calib, x_avg, bl_prox_std, 5, factor)
-delta_prob_qb_vel = get_contribution(cpnet_calib, x_avg, qb_vel_std, 6, factor)
-delta_prob_t_throw = get_contribution(cpnet_calib, x_avg, t_throw_std, 7, factor)
 
-delta_sum = delta_prob_lat_dist + delta_prob_lon_dist + delta_prob_wr_prox + delta_prob_db_prox + delta_prob_sl_prox + delta_prob_bl_prox + delta_prob_qb_vel + delta_prob_t_throw
-lat_dist_contrib = delta_prob_lat_dist/delta_sum
-lon_dist_contrib = delta_prob_lon_dist/delta_sum
-wr_prox_contrib = delta_prob_wr_prox/delta_sum
-db_prox_contrib = delta_prob_db_prox/delta_sum
-sl_prox_contrib = delta_prob_sl_prox/delta_sum
-bl_prox_contrib = delta_prob_bl_prox/delta_sum
-qb_vel_contrib = delta_prob_qb_vel/delta_sum
-t_throw_contrib = delta_prob_t_throw/delta_sum
 
-print("Lateral distance contribution: {:.1f}%".format(100*lat_dist_contrib))
-print("Longitudinal distance contribution: {:.1f}%".format(100*lon_dist_contrib))
-print("WR-ball proximity contribution: {:.1f}%".format(100*wr_prox_contrib))
-print("DB-WR proximity contribution: {:.1f}%".format(100*db_prox_contrib))
-print("WR-sideline proximity contribution: {:.1f}%".format(100*sl_prox_contrib))
-print("Blitzer-QB proximity contribution: {:.1f}%".format(100*bl_prox_contrib))
-print("QB speed contribution: {:.1f}%".format(100*qb_vel_contrib))
-print("Time to throw contribution: {:.1f}%".format(100*t_throw_contrib))
+# #######################
+# #### CONTRIBUTION #####
+# #######################
+
+# # load saved model
+# cpnet_calib = ModelWithTemperature(cpnet)
+# ckpt_file = "../models/best_0194_0.483_calib.pt"
+# cpnet_calib.load_state_dict(torch.load(ckpt_file)["model_state_dict"])
+# cpnet_calib.eval().cuda()
+
+# # get average data
+# x_avg = np.array([lat_dist_mean, lon_dist_mean, wr_prox_mean, db_prox_mean, sl_prox_mean, bl_prox_mean, qb_vel_mean, t_throw_mean])
+
+# # find lat_dist contribution
+# factor = 1
+# delta_prob_lat_dist = get_contribution(cpnet_calib, x_avg, lat_dist_std, 0, factor)
+# delta_prob_lon_dist = get_contribution(cpnet_calib, x_avg, lon_dist_std, 1, factor)
+# delta_prob_wr_prox = get_contribution(cpnet_calib, x_avg, wr_prox_std, 2, factor)
+# delta_prob_db_prox = get_contribution(cpnet_calib, x_avg, db_prox_std, 3, factor)
+# delta_prob_sl_prox = get_contribution(cpnet_calib, x_avg, sl_prox_std, 4, factor)
+# delta_prob_bl_prox = get_contribution(cpnet_calib, x_avg, bl_prox_std, 5, factor)
+# delta_prob_qb_vel = get_contribution(cpnet_calib, x_avg, qb_vel_std, 6, factor)
+# delta_prob_t_throw = get_contribution(cpnet_calib, x_avg, t_throw_std, 7, factor)
+
+# delta_sum = delta_prob_lat_dist + delta_prob_lon_dist + delta_prob_wr_prox + delta_prob_db_prox + delta_prob_sl_prox + delta_prob_bl_prox + delta_prob_qb_vel + delta_prob_t_throw
+# lat_dist_contrib = delta_prob_lat_dist/delta_sum
+# lon_dist_contrib = delta_prob_lon_dist/delta_sum
+# wr_prox_contrib = delta_prob_wr_prox/delta_sum
+# db_prox_contrib = delta_prob_db_prox/delta_sum
+# sl_prox_contrib = delta_prob_sl_prox/delta_sum
+# bl_prox_contrib = delta_prob_bl_prox/delta_sum
+# qb_vel_contrib = delta_prob_qb_vel/delta_sum
+# t_throw_contrib = delta_prob_t_throw/delta_sum
+
+# print("Lat_dist ({:.1f} +/- {:.1f}): {:.1f}%".format(lat_dist_mean, lat_dist_std, 100*lat_dist_contrib))
+# print("Lon_dist ({:.1f} +/- {:.1f}): {:.1f}%".format(lon_dist_mean, lon_dist_std, 100*lon_dist_contrib))
+# print("WR_prox ({:.1f} +/- {:.1f}): {:.1f}%".format(wr_prox_mean, wr_prox_std, 100*wr_prox_contrib))
+# print("DB_prox ({:.1f} +/- {:.1f}): {:.1f}%".format(db_prox_mean, db_prox_std, 100*db_prox_contrib))
+# print("SL_prox ({:.1f} +/- {:.1f}): {:.1f}%".format(sl_prox_mean, sl_prox_std, 100*sl_prox_contrib))
+# print("BL_prox ({:.1f} +/- {:.1f}): {:.1f}%".format(bl_prox_mean, bl_prox_std, 100*bl_prox_contrib))
+# print("QB_speed ({:.1f} +/- {:.1f}): {:.1f}%".format(qb_vel_mean, qb_vel_std, 100*qb_vel_contrib))
+# print("T_throw ({:.1f} +/- {:.1f}): {:.1f}%".format(t_throw_mean, t_throw_std, 100*t_throw_contrib))

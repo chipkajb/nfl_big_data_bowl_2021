@@ -177,12 +177,12 @@ def get_metrics(week, play_df, games_df, plays_df):
     metrics[0,2] = play_id
 
     # determine who has ball (home/away)
-    possesstion_team = plays_df.query('gameId == {:.0f} and playId == {:.0f}'.format(game_id, play_id)).possessionTeam.iloc[0]
+    possession_team = plays_df.query('gameId == {:.0f} and playId == {:.0f}'.format(game_id, play_id)).possessionTeam.iloc[0]
     home_team = games_df.query('gameId == {:.0f}'.format(game_id)).homeTeamAbbr.iloc[0]
     away_team = games_df.query('gameId == {:.0f}'.format(game_id)).visitorTeamAbbr.iloc[0]
-    if possesstion_team == home_team:
+    if possession_team == home_team:
         possession = 'home'
-    elif possesstion_team == away_team:
+    elif possession_team == away_team:
         possession = 'away'
     else:
         print("Cannot determine who has ball")
@@ -193,7 +193,7 @@ def get_metrics(week, play_df, games_df, plays_df):
     if not ret:
         return False, metrics
 
-    # get dataframe when call arrives
+    # get dataframe when ball arrives
     ret, pass_arrived_df = find_pass_arrived_df(play_df, possession)
     if not ret:
         return False, metrics
