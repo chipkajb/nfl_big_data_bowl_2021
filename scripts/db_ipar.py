@@ -150,9 +150,8 @@ from temperature_scaling import *
 
 metrics_df = pd.read_csv('../data/ipar.csv')
 
-column_names = ["name", "position", "n_throws", "ipar", "incomp_per", \
-                "int_per", "fool_incomp_to_comp", \
-                "fool_comp_to_incomp", "avg_comp_prob", "epa"]
+column_names = ["name", "position", "n_throws", "inc_rate", "int_rate", \
+                "epa", "eir", "irae", "irar"]
 rankings_df = pd.DataFrame(data = np.empty((0,len(column_names))), columns = column_names)
 defenders = np.unique(metrics_df.def_name)
 routes = np.unique(metrics_df.route[metrics_df.route.notnull()])
@@ -160,93 +159,76 @@ for defender in tqdm(defenders, desc="Analyzing data"):
     defender_data = metrics_df.query('def_name == "' + defender + '"')
     def_name = defender_data.def_name.iloc[0]
     def_pos = defender_data.def_pos.iloc[0]
-    ipar = np.mean(defender_data.ipar)
+    irar = np.mean(defender_data.ipar)
     n_throws = len(defender_data)
     n_incomp = len(defender_data.query('result == "I"'))
     n_comp = len(defender_data.query('result == "C"'))
     n_int = len(defender_data.query('result == "IN"'))
-    per_incomp = 100.0*(n_incomp + n_int) / (n_incomp + n_int + n_comp)
-    per_int = 100.0*(n_int) / (n_incomp + n_int + n_comp)
-    n_fool_comp = len(defender_data.query('comp_prob < 0.5 and result == "C"'))
-    n_fool_comp_total = len(defender_data.query('comp_prob < 0.5'))
-    if n_fool_comp_total > 0:
-        fool_comp = 100.0*n_fool_comp / n_fool_comp_total
-    else:
-        fool_comp = np.nan
-    n_fool_incomp = len(defender_data.query('comp_prob > 0.5 and (result == "I" or result == "IN")'))
-    n_fool_incomp_total = len(defender_data.query('comp_prob > 0.5'))
-    if n_fool_incomp_total > 0:
-        fool_incomp = 100.0*n_fool_incomp / n_fool_incomp_total
-    else:
-        fool_incomp = np.nan
-    avg_cp = 100.0*np.mean(defender_data.comp_prob)
+    inc_rate = 100.0*(n_incomp + n_int) / (n_incomp + n_int + n_comp)
+    int_rate = 100.0*(n_int) / (n_incomp + n_int + n_comp)
+    exp_inc_rate = 100.0 - 100.0*np.mean(defender_data.comp_prob)
     epa = np.mean(defender_data.epa)
-    new_row = pd.DataFrame([[def_name, def_pos, n_throws, ipar, per_incomp, per_int, fool_comp, \
-                            fool_incomp, avg_cp, epa]], columns=column_names)
+    irae = inc_rate - exp_inc_rate
+    new_row = pd.DataFrame([[def_name, def_pos, n_throws, inc_rate, int_rate, epa, exp_inc_rate, irae, irar]], columns=column_names)
     rankings_df = rankings_df.append(new_row, ignore_index=True)
 
 # Rankings
-column_names = ["name", "position", "n_throws", "ipar", "incomp_per", \
-                "int_per", "fool_incomp_to_comp", \
-                "fool_comp_to_incomp", "avg_comp_prob", "epa", "overall_score"]
+column_names = ["name", "position", "n_throws", "inc_rate", "int_rate", \
+                "epa", "eir", "irae", "irar", "overall_score"]
 values_rank_df = pd.DataFrame(data = np.empty((0,len(column_names))), columns = column_names)
 overall_rank_df = pd.DataFrame(data = np.empty((0,len(column_names))), columns = column_names)
-min_throws = 45
+# query = 'n_throws >= 45 and (position == "CB")'
+query = 'n_throws >= 25 and (position == "FS" or position == "SS" or position == "S" or position == "DB")'
+# query = 'n_throws >= 25 and (position == "ILB" or position == "LB" or position == "MLB" or position == "OLB")'
 
-# IPAR
-rank_df = rankings_df.sort_values(by=['ipar'], ascending=False)
-rank = rank_df.query('n_throws >= {:.0f} and position == "CB"'.format(min_throws)).reset_index().drop(columns=['index'])
+# Expected incompletion rate above replacement
+rank_df = rankings_df.sort_values(by=['irar'], ascending=False)
+rank = rank_df.query(query).reset_index().drop(columns=['index'])
 values_rank_df.name = rank.sort_values(by=['name']).name
 values_rank_df.position = rank.sort_values(by=['name']).position
 values_rank_df.n_throws = rank.sort_values(by=['name']).n_throws
-values_rank_df.ipar = rank.sort_values(by=['name']).ipar
+values_rank_df.irar = rank.sort_values(by=['name']).irar
 overall_rank_df.name = rank.sort_values(by=['name']).name
 overall_rank_df.position = rank.sort_values(by=['name']).position
 overall_rank_df.n_throws = rank.sort_values(by=['name']).n_throws
-overall_rank_df.ipar = rank.sort_values(by=['name']).index + 1
+overall_rank_df.irar = rank.sort_values(by=['name']).index + 1
 values_rank_df = values_rank_df.reset_index().drop(columns=['index'])
 overall_rank_df = overall_rank_df.reset_index().drop(columns=['index'])
 
-# Incompletion percentage
-rank_df = rankings_df.sort_values(by=['incomp_per'], ascending=False)
-rank = rank_df.query('n_throws >= {:.0f} and position == "CB"'.format(min_throws)).reset_index().drop(columns=['index'])
-values_rank_df.incomp_per = rank.sort_values(by=['name']).incomp_per.reset_index().drop(columns=['index'])
-overall_rank_df.incomp_per = rank.sort_values(by=['name']).index + 1
+# Incompletion rate
+rank_df = rankings_df.sort_values(by=['inc_rate'], ascending=False)
+rank = rank_df.query(query).reset_index().drop(columns=['index'])
+values_rank_df.inc_rate = rank.sort_values(by=['name']).inc_rate.reset_index().drop(columns=['index'])
+overall_rank_df.inc_rate = rank.sort_values(by=['name']).index + 1
 
-# Interception percentage
-rank_df = rankings_df.sort_values(by=['int_per'], ascending=False)
-rank = rank_df.query('n_throws >= {:.0f} and position == "CB"'.format(min_throws)).reset_index().drop(columns=['index'])
-values_rank_df.int_per = rank.sort_values(by=['name']).int_per.reset_index().drop(columns=['index'])
-overall_rank_df.int_per = rank.sort_values(by=['name']).index + 1
-
-# Fooled (incomplete -> complete) percentage
-rank_df = rankings_df.sort_values(by=['fool_incomp_to_comp'], ascending=True)
-rank = rank_df.query('n_throws >= {:.0f} and position == "CB"'.format(min_throws)).reset_index().drop(columns=['index'])
-values_rank_df.fool_incomp_to_comp = rank.sort_values(by=['name']).fool_incomp_to_comp.reset_index().drop(columns=['index'])
-overall_rank_df.fool_incomp_to_comp = rank.sort_values(by=['name']).index + 1
-
-# Fooled (complete -> incomplete) percentage
-rank_df = rankings_df.sort_values(by=['fool_comp_to_incomp'], ascending=False)
-rank = rank_df.query('n_throws >= {:.0f} and position == "CB"'.format(min_throws)).reset_index().drop(columns=['index'])
-values_rank_df.fool_comp_to_incomp = rank.sort_values(by=['name']).fool_comp_to_incomp.reset_index().drop(columns=['index'])
-overall_rank_df.fool_comp_to_incomp = rank.sort_values(by=['name']).index + 1
-
-# Average completion probability 
-rank_df = rankings_df.sort_values(by=['avg_comp_prob'], ascending=True)
-rank = rank_df.query('n_throws >= {:.0f} and position == "CB"'.format(min_throws)).reset_index().drop(columns=['index'])
-values_rank_df.avg_comp_prob = rank.sort_values(by=['name']).avg_comp_prob.reset_index().drop(columns=['index'])
-overall_rank_df.avg_comp_prob = rank.sort_values(by=['name']).index + 1
+# Interception rate
+rank_df = rankings_df.sort_values(by=['int_rate'], ascending=False)
+rank = rank_df.query(query).reset_index().drop(columns=['index'])
+values_rank_df.int_rate = rank.sort_values(by=['name']).int_rate.reset_index().drop(columns=['index'])
+overall_rank_df.int_rate = rank.sort_values(by=['name']).index + 1
 
 # EPA
 rank_df = rankings_df.sort_values(by=['epa'], ascending=False)
-rank = rank_df.query('n_throws >= {:.0f} and position == "CB"'.format(min_throws)).reset_index().drop(columns=['index'])
+rank = rank_df.query(query).reset_index().drop(columns=['index'])
 values_rank_df.epa = rank.sort_values(by=['name']).epa.reset_index().drop(columns=['index'])
 overall_rank_df.epa = rank.sort_values(by=['name']).index + 1
 
+# Expected incompletion rate
+rank_df = rankings_df.sort_values(by=['eir'], ascending=False)
+rank = rank_df.query(query).reset_index().drop(columns=['index'])
+values_rank_df.eir = rank.sort_values(by=['name']).eir.reset_index().drop(columns=['index'])
+overall_rank_df.eir = rank.sort_values(by=['name']).index + 1
+
+# Incompletion rate above expectation
+rank_df = rankings_df.sort_values(by=['irae'], ascending=False)
+rank = rank_df.query(query).reset_index().drop(columns=['index'])
+values_rank_df.irae = rank.sort_values(by=['name']).irae.reset_index().drop(columns=['index'])
+overall_rank_df.irae = rank.sort_values(by=['name']).index + 1
+
 # Overall rank
-overall_rank_df.overall_score = overall_rank_df.ipar + overall_rank_df.incomp_per + overall_rank_df.int_per + \
-                                overall_rank_df.fool_incomp_to_comp + overall_rank_df.fool_comp_to_incomp + \
-                                overall_rank_df.avg_comp_prob + overall_rank_df.epa
+overall_rank_df.overall_score = overall_rank_df.inc_rate + overall_rank_df.int_rate + \
+                                overall_rank_df.epa + overall_rank_df.eir + \
+                                overall_rank_df.irae + overall_rank_df.irar
 values_rank_df.overall_score = overall_rank_df.overall_score
 overall_rank_df = overall_rank_df.sort_values(by=['overall_score'], ascending=True).reset_index().drop(columns=['index'])
 values_rank_df = values_rank_df.sort_values(by=['overall_score'], ascending=True).reset_index().drop(columns=['index'])
@@ -265,5 +247,5 @@ print("")
 print("")
 print("")
 
-overall_rank_df.to_csv("~/Desktop/cb_rankings_1.csv", index=True)
-values_rank_df.to_csv("~/Desktop/cb_rankings_2.csv", index=True)
+overall_rank_df.to_csv("~/Desktop/rankings_1.csv", index=True)
+values_rank_df.to_csv("~/Desktop/rankings_2.csv", index=True)
