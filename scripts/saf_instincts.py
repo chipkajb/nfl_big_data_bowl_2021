@@ -93,11 +93,33 @@ from cp_data import *
 #                 n_bad += 1
 #                 continue
 
+#             # find FS
+#             try:
+#                 ball_snap_df = play_df.query('event == "ball_snap"')
+#                 def_ball_snap_df = ball_snap_df.query('team != "' + possession + '" and displayName != "Football"')
+#                 football_xy = ball_snap_df.query('displayName == "Football"')[["x","y"]].values
+#                 def_players_xy = def_ball_snap_df[["x","y"]].values
+#                 play_dir = ball_snap_df.playDirection.iloc[0]
+#                 dist_diff = def_players_xy - football_xy
+#                 if play_dir == 'left':
+#                     fs_sel = (dist_diff[:,0] < -10) & (dist_diff[:,1] < 10) & (dist_diff[:,1] > -10)
+#                 elif play_dir == 'right':
+#                     fs_sel = (dist_diff[:,0] > 10) & (dist_diff[:,1] < 10) & (dist_diff[:,1] > -10)
+#                 fs_df = def_ball_snap_df[fs_sel]
+#             except:
+#                 n_bad += 1
+#                 continue
+#             if len(fs_df) == 0:
+#                 n_bad += 1
+#                 continue
+
 #             # find defender's position at frame 1 wrt receiver at frame 2
 #             try:
-#                 def_frame1_df = frame1_df.query('team != "' + possession + '" and displayName != "Football"')
-#                 def_frame1_df = def_frame1_df.sort_values(by=['displayName']).reset_index().drop(columns=['index'])
-#                 def_players_xy = def_frame1_df[["x","y"]].values
+#                 def_players_xy = np.empty((0,2))
+#                 for i in range(len(fs_df)):
+#                     fs_name = fs_df.displayName.iloc[i]
+#                     fs_xy = frame1_df.query('displayName == "' + fs_name + '"')[["x","y"]].values
+#                     def_players_xy = np.append(def_players_xy, fs_xy, axis=0)
 #                 receiver_xy = frame2_df.query('displayName == "' + receiver + '"')[["x","y"]].values
 #                 def_dist1 = np.linalg.norm(receiver_xy - def_players_xy, axis=1)
 #             except:
@@ -106,9 +128,11 @@ from cp_data import *
 
 #             # find defender's position at frame 2 wrt receiver at frame 2
 #             try:
-#                 def_frame2_df = frame2_df.query('team != "' + possession + '" and displayName != "Football"')
-#                 def_frame2_df = def_frame2_df.sort_values(by=['displayName']).reset_index().drop(columns=['index'])
-#                 def_players_xy = def_frame2_df[["x","y"]].values
+#                 def_players_xy = np.empty((0,2))
+#                 for i in range(len(fs_df)):
+#                     fs_name = fs_df.displayName.iloc[i]
+#                     fs_xy = frame2_df.query('displayName == "' + fs_name + '"')[["x","y"]].values
+#                     def_players_xy = np.append(def_players_xy, fs_xy, axis=0)
 #                 receiver_xy = frame2_df.query('displayName == "' + receiver + '"')[["x","y"]].values
 #                 def_dist2 = np.linalg.norm(receiver_xy - def_players_xy, axis=1)
 #             except:
@@ -116,15 +140,20 @@ from cp_data import *
 #                 continue
 
 #             # check if data is good again
-#             if len(def_frame1_df) != len(def_frame2_df):
+#             if len(def_dist1) != len(def_dist2):
 #                 n_bad += 1
 #                 continue
 
-#             for i in range(len(def_frame1_df)):
-#                 new_row = pd.DataFrame([[def_frame1_df.displayName.iloc[i], def_frame1_df.position.iloc[i],
-#                                     def_dist1[i], def_dist2[i], def_dist1[i]-def_dist2[i]]],
-#                                     columns=column_names)
-#                 metrics_df = metrics_df.append(new_row, ignore_index=True)
+#             # append data
+#             try:
+#                 for i in range(len(def_dist1)):
+#                     new_row = pd.DataFrame([[fs_df.displayName.iloc[i], fs_df.position.iloc[i],
+#                                         def_dist1[i], def_dist2[i], def_dist1[i]-def_dist2[i]]],
+#                                         columns=column_names)
+#                     metrics_df = metrics_df.append(new_row, ignore_index=True)
+#             except:
+#                 n_bad += 1
+#                 continue
 
 #             # everything was successful
 #             n_good += 1
