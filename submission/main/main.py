@@ -14,6 +14,13 @@ from analysis import *
 # animate_play(week=14, gameId=2018120911, playId=1584)
 
 
+# #####################################
+# ##### GET SPECIFIC PLAY METRICS #####
+# #####################################
+bp()
+# scores_df = pd.read_csv('../input/nfl-bdb-data/cb_scores.csv')
+
+
 # ##################################
 # ##### GENERATE TRAINING DATA #####
 # ##################################
@@ -69,10 +76,10 @@ from analysis import *
 # analyze_advanced_metrics(pos)
 
 
-##########################################
-##### MAKE INTERACTIVE SCATTER PLOTS #####
-##########################################
-scores_df = pd.read_csv('../input/nfl-bdb-data/cb_scores.csv')
-plot_playmaking_skills(scores_df)
-plot_coverage_skills(scores_df)
-plot_ball_skills(scores_df)
+# ##########################################
+# ##### MAKE INTERACTIVE SCATTER PLOTS #####
+# ##########################################
+# scores_df = pd.read_csv('../input/nfl-bdb-data/cb_scores.csv')
+# plot_playmaking_skills(scores_df)
+# plot_coverage_skills(scores_df)
+# plot_ball_skills(scores_df)
