@@ -32,7 +32,7 @@ def plot_playmaking_skills(scores_df):
         fillcolor="rgba(255, 0, 0, 0.1)",
     )
     fig.add_shape(type="rect",
-        x0=50, y0=-0.8, x1=60, y1=0.4,
+        x0=48, y0=-0.8, x1=60, y1=0.4,
         line=dict(
             color="rgba(255, 0, 0, 0.5)",
             width=2,
@@ -40,7 +40,7 @@ def plot_playmaking_skills(scores_df):
         fillcolor="rgba(255, 0, 0, 0.1)",
     )
     fig.add_trace(go.Scatter(
-        x=[40, 55],
+        x=[30, 55],
         y=[0.35, -0.5],
         text=["Top Playmaking Ability", "Top Tracking<br>Ability"],
         mode="text",
@@ -75,7 +75,7 @@ def plot_ball_skills(scores_df):
                                             color='DarkSlateGrey')),
                       selector=dict(mode='markers'))
     fig.add_shape(type="rect",
-        x0=-15, y0=5, x1=20, y1=12,
+        x0=-15, y0=4, x1=17, y1=12,
         line=dict(
             color="rgba(255, 0, 0, 0.5)",
             width=2,
@@ -83,7 +83,7 @@ def plot_ball_skills(scores_df):
         fillcolor="rgba(255, 0, 0, 0.1)",
     )
     fig.add_shape(type="rect",
-        x0=5, y0=-1, x1=20, y1=12,
+        x0=5, y0=-1, x1=17, y1=12,
         line=dict(
             color="rgba(255, 0, 0, 0.5)",
             width=2,
@@ -91,7 +91,7 @@ def plot_ball_skills(scores_df):
         fillcolor="rgba(255, 0, 0, 0.1)",
     )
     fig.add_trace(go.Scatter(
-        x=[-5, 15],
+        x=[-8, 13],
         y=[10, 0],
         text=["Top Takeaway Ability", "Top Pass Breakup<br>Ability"],
         mode="text",
@@ -109,14 +109,14 @@ def plot_ball_skills(scores_df):
 
 def plot_coverage_skills(scores_df):
     fig = px.scatter(scores_df,
-                        x="irar",
+                        x="ipa",
                         y="inc_rate",
                         color="overall_score",
                         color_continuous_scale="portland",
                         hover_data=["name"],
                         title="Coverage Skills",
                         labels={
-                         "irar": "IPA",
+                         "ipa": "IPA",
                          "inc_rate": "INC rate",
                          "overall_score": "Overall score",
                          "name": "Name"
@@ -126,7 +126,7 @@ def plot_coverage_skills(scores_df):
                                             color='DarkSlateGrey')),
                       selector=dict(mode='markers'))
     fig.add_shape(type="rect",
-        x0=5, y0=50, x1=26, y1=60,
+        x0=-2, y0=50, x1=18, y1=60,
         line=dict(
             color="rgba(255, 0, 0, 0.5)",
             width=2,
@@ -134,7 +134,7 @@ def plot_coverage_skills(scores_df):
         fillcolor="rgba(255, 0, 0, 0.1)",
     )
     fig.add_shape(type="rect",
-        x0=20, y0=15, x1=26, y1=60,
+        x0=12, y0=15, x1=18, y1=60,
         line=dict(
             color="rgba(255, 0, 0, 0.5)",
             width=2,
@@ -142,7 +142,7 @@ def plot_coverage_skills(scores_df):
         fillcolor="rgba(255, 0, 0, 0.1)",
     )
     fig.add_trace(go.Scatter(
-        x=[10, 23],
+        x=[2, 15],
         y=[57, 22],
         text=["Top Shutdown Ability", "Top True Coverage<br>Ability"],
         mode="text",

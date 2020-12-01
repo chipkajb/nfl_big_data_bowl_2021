@@ -1,2 +1,3 @@
 .vs
 submission/input/nfl-big-data-bowl-2021/*.csv
+submission/input/nfl-bdb-scripts/*.pyc
