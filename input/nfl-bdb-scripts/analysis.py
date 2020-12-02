@@ -1,6 +1,10 @@
 from pdb import set_trace as bp
 from tqdm import tqdm
 from tqdm import trange
+import numpy as np
+import torch
+import pandas as pd
+pd.options.mode.chained_assignment = None
 from training_model import *
 from training_data import *
 from temperature_scaling import *
@@ -233,3 +237,43 @@ def analyze_advanced_metrics(pos="cb"):
 
     overall_rank_df.to_csv("../input/nfl-bdb-data/" + pos + "_rankings.csv", index=False)
     values_rank_df.to_csv("../input/nfl-bdb-data/" + pos + "_scores.csv", index=False)
+
+# get specific play metrics
+def get_specific_play_metrics(week, gameId, playId):
+    train_df = pd.read_csv('../input/nfl-bdb-data/training_data.csv')
+    slay_play = train_df.query('week == {:.0f} and game == {:.0f} and play == {:.0f}'.format(week, gameId, playId))
+    slay_play.result = 'INCOMPLETE'
+    slay_play = slay_play.rename(columns={"week": "Week", "game": "Game ID", "play": "Play ID", \
+                                          "lat_dist": "Lateral pass distance", "lon_dist": "Longitudinal pass distance", \
+                                          "ball_prox": "WR-ball proximity", "db_prox": "WR-DB proximity", \
+                                          "sl_prox": "WR-sideline proximity", "bl_prox": "QB-blitzer proximity", \
+                                          "qb_speed": "QB speed", "t_throw": "Time to throw", "result": "Result", "route": "Route"})
+    print("Play metrics:")
+    print(slay_play.iloc[0])
+
+    print("")
+    median_dist = np.median(train_df.query('route == "HITCH"').db_prox)
+    print("Median WR-DB separation for HITCH routes: {:.2f} yards".format(median_dist))
+    print("")
+    replacement_slay_play = slay_play.copy()
+    replacement_slay_play["WR-DB proximity"] = median_dist
+
+    model_path = "../input/nfl-bdb-data/best_0194_0.483_calib.pt"
+    train_df = load_and_clean_data()
+    cpnet = setup_network(train_df)
+    cpnet_calib = ModelWithTemperature(cpnet)
+    cpnet_calib.load_state_dict(torch.load(model_path, map_location='cpu')["model_state_dict"])
+    cpnet_calib.eval()
+    x0 = torch.from_numpy(slay_play.iloc[0,3:11].values.astype(float)).float().unsqueeze(0)
+    logits0 = cpnet_calib(x0)
+    softmax0 = F.softmax(logits0, dim=1)
+    inc_prob0 = 100*softmax0[0,0].item()
+    print("Incompletion probability: {:.1f}%".format(inc_prob0))
+
+    x1 = torch.from_numpy(replacement_slay_play.iloc[0,3:11].values.astype(float)).float().unsqueeze(0)
+    logits1 = cpnet_calib(x1)
+    softmax1 = F.softmax(logits1, dim=1)
+    inc_prob1 = 100*softmax1[0,0].item()
+    print("Incompletion probability with median WR-DB separation: {:.1f}%".format(inc_prob1))
+
+    print("Incompletion probability added: {:.1f}%".format(inc_prob0-inc_prob1))

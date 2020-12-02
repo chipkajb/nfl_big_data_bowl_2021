@@ -1,6 +1,7 @@
 import os, sys
 sys.path.append(os.path.join(os.path.dirname(os.getcwd()),'input/nfl-bdb-scripts'))
 import pandas as pd
+from pdb import set_trace as bp
 from visualization import *
 from training_data import *
 from training_model import *
@@ -17,8 +18,7 @@ from analysis import *
 # #####################################
 # ##### GET SPECIFIC PLAY METRICS #####
 # #####################################
-bp()
-# scores_df = pd.read_csv('../input/nfl-bdb-data/cb_scores.csv')
+get_specific_play_metrics(week=14, gameId=2018120911, playId=1584)
 
 
 # ##################################

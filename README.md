@@ -12,6 +12,15 @@ Make sure that all of the requirements are met.
 pip install -r requirements.txt
 ```
 
+If you are not working on a computer with a GPU, then the above command might fail when attempting to install `torch`.
+If this is the case, you will need to comment out `torch` in `requirements.txt`, and then run the following commands to create the necessary conda environment.
+```
+conda create -n nfl_bdb python=3.6
+conda activate nfl_bdb
+conda install pytorch-cpu -c pytorch
+pip install -r requirements.txt
+```
+
 ### Run
 You can run everything from `main.py` located in the `main` directory. You can simply comment/uncomment the sections that you
 would like to run.
