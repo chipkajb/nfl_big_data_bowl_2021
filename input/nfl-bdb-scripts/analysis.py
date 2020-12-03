@@ -157,9 +157,9 @@ def analyze_advanced_metrics(pos="cb"):
     if pos == "cb":
         query = 'n_throws >= 45 and (position == "CB")'
     elif pos == "saf":
-        query = 'n_throws >= 25 and (position == "FS" or position == "SS" or position == "S" or position == "DB")'
+        query = 'n_throws >= 30 and (position == "FS" or position == "SS" or position == "S" or position == "DB")'
     elif pos == "lb":
-        query = 'n_throws >= 25 and (position == "ILB" or position == "LB" or position == "MLB" or position == "OLB")'
+        query = 'n_throws >= 30 and (position == "ILB" or position == "LB" or position == "MLB" or position == "OLB")'
 
     # Incompletion probability added
     rank_df = rankings_df.sort_values(by=['ipa'], ascending=False)
