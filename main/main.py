@@ -72,7 +72,7 @@ from analysis import *
 #############################################
 ##### ANALYZE ADVANCED COVERAGE METRICS #####
 #############################################
-pos = "lb" # "cb", "saf", or "lb"
+pos = "cb" # "cb", "saf", or "lb"
 analyze_advanced_metrics(pos)
 
 
