@@ -124,6 +124,17 @@ def get_advanced_metrics(model_path):
     metrics_df.to_csv("../input/nfl-bdb-data/advanced_metrics.csv", index=False)
 
 
+# handle ties
+def handle_ties(values_rank_df, overall_rank_df, c):
+    value_counts = values_rank_df[c].value_counts()
+    values = value_counts.keys()
+    for value in values:
+        count = value_counts[value]
+        if count > 1:
+            overall_rank_df.loc[values_rank_df[c] == value, c] = np.min(overall_rank_df[values_rank_df[c] == value][c])
+
+    return overall_rank_df
+
 # analyze advanced metrics
 def analyze_advanced_metrics(pos="cb"):
     metrics_df = pd.read_csv('../input/nfl-bdb-data/advanced_metrics.csv')
@@ -174,44 +185,53 @@ def analyze_advanced_metrics(pos="cb"):
     overall_rank_df.ipa = rank.sort_values(by=['name']).index + 1
     values_rank_df = values_rank_df.reset_index().drop(columns=['index'])
     overall_rank_df = overall_rank_df.reset_index().drop(columns=['index'])
+    overall_rank_df = handle_ties(values_rank_df, overall_rank_df, 'ipa')
 
     # Incompletion rate
     rank_df = rankings_df.sort_values(by=['inc_rate'], ascending=False)
     rank = rank_df.query(query).reset_index().drop(columns=['index'])
     values_rank_df.inc_rate = rank.sort_values(by=['name']).inc_rate.reset_index().drop(columns=['index'])
     overall_rank_df.inc_rate = rank.sort_values(by=['name']).index + 1
+    overall_rank_df = handle_ties(values_rank_df, overall_rank_df, 'inc_rate')
 
     # Interception rate
     rank_df = rankings_df.sort_values(by=['int_rate'], ascending=False)
     rank = rank_df.query(query).reset_index().drop(columns=['index'])
     values_rank_df.int_rate = rank.sort_values(by=['name']).int_rate.reset_index().drop(columns=['index'])
     overall_rank_df.int_rate = rank.sort_values(by=['name']).index + 1
+    overall_rank_df = handle_ties(values_rank_df, overall_rank_df, 'int_rate')
 
     # EPA
     rank_df = rankings_df.sort_values(by=['epa'], ascending=False)
     rank = rank_df.query(query).reset_index().drop(columns=['index'])
     values_rank_df.epa = rank.sort_values(by=['name']).epa.reset_index().drop(columns=['index'])
     overall_rank_df.epa = rank.sort_values(by=['name']).index + 1
+    overall_rank_df = handle_ties(values_rank_df, overall_rank_df, 'epa')
 
     # Expected incompletion rate
     rank_df = rankings_df.sort_values(by=['eir'], ascending=False)
     rank = rank_df.query(query).reset_index().drop(columns=['index'])
     values_rank_df.eir = rank.sort_values(by=['name']).eir.reset_index().drop(columns=['index'])
     overall_rank_df.eir = rank.sort_values(by=['name']).index + 1
+    overall_rank_df = handle_ties(values_rank_df, overall_rank_df, 'eir')
 
     # Incompletion rate above expectation
     rank_df = rankings_df.sort_values(by=['irae'], ascending=False)
     rank = rank_df.query(query).reset_index().drop(columns=['index'])
     values_rank_df.irae = rank.sort_values(by=['name']).irae.reset_index().drop(columns=['index'])
     overall_rank_df.irae = rank.sort_values(by=['name']).index + 1
+    overall_rank_df = handle_ties(values_rank_df, overall_rank_df, 'irae')
 
     # Overall rank
     overall_rank_df.raw_score = overall_rank_df.inc_rate + overall_rank_df.int_rate + \
                                     overall_rank_df.epa + overall_rank_df.eir + \
                                     overall_rank_df.irae + overall_rank_df.ipa
     values_rank_df.raw_score = overall_rank_df.raw_score
-    overall_rank_df = overall_rank_df.sort_values(by=['raw_score'], ascending=True).reset_index().drop(columns=['index'])
-    values_rank_df = values_rank_df.sort_values(by=['raw_score'], ascending=True).reset_index().drop(columns=['index'])
+    # first sort by n_throws, so ties will go to player with higher n_throws
+    overall_rank_df = overall_rank_df.sort_values(by=['n_throws'], ascending=False).reset_index().drop(columns=['index'])
+    values_rank_df = values_rank_df.sort_values(by=['n_throws'], ascending=False).reset_index().drop(columns=['index'])
+    overall_rank_df = overall_rank_df.sort_values(by=['raw_score'], ascending=True, kind='mergesort').reset_index().drop(columns=['index'])
+    values_rank_df = values_rank_df.sort_values(by=['raw_score'], ascending=True, kind='mergesort').reset_index().drop(columns=['index'])
     overall_rank_df.index += 1 
     values_rank_df.index += 1
 
